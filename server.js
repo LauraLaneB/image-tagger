@@ -7,6 +7,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.static("public"));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // 🔐 SUPABASE CONFIG
 const supabase = createClient(
@@ -17,7 +18,11 @@ const supabase = createClient(
 // 🖼️ Images (tu peux garder ton dossier images OU liste)
 const path = require("path");
 
-const images = fs.readdirSync(path.join(__dirname, "images"));
+const images = fs.readdirSync(path.join(__dirname, "images"))
+  .map(file => ({
+    id: file,
+    url: "/images/" + file
+  }));
 
 // 🎲 image aléatoire
 app.get("/random-image", (req, res) => {
