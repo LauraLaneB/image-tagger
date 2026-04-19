@@ -1,55 +1,41 @@
-const express = require('express');
-const fs = require('fs');
+const express = require("express");
+const { createClient } = require("@supabase/supabase-js");
 const app = express();
 
 app.use(express.json());
-app.use(express.static('public'));
-app.use('/images', express.static('images'));
+app.use(express.static("public"));
 
-// Charger les images
-const images = fs.readdirSync('./images');
+// 🔐 SUPABASE CONFIG
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
-// Charger tags
-let tags = {};
-if (fs.existsSync('tags.json')) {
-  tags = JSON.parse(fs.readFileSync('tags.json'));
-}
+// 🖼️ Images (tu peux garder ton dossier images OU liste)
+const images = [
+  { id: "img1", url: "/images/img1.jpg" },
+  { id: "img2", url: "/images/img2.jpg" },
+  { id: "img3", url: "/images/img3.jpg" }
+];
 
-// Image aléatoire
-app.get('/random-image', (req, res) => {
-  const taggedImages = Object.keys(tags);
-
-  const untagged = images.filter(img => !taggedImages.includes(img));
-
-  const pool = untagged.length > 0 ? untagged : images;
-
-  const random = pool[Math.floor(Math.random() * pool.length)];
-
-  res.json({ id: random, url: '/images/' + random });
+// 🎲 image aléatoire
+app.get("/random-image", (req, res) => {
+  const img = images[Math.floor(Math.random() * images.length)];
+  res.json(img);
 });
 
-// Sauvegarder tag
-app.post('/tag', (req, res) => {
-  const { image_id, tag } = req.body;
+// 💾 enregistrement tags
+app.post("/tag", async (req, res) => {
+  const { image_id, tags } = req.body;
 
-  if (!tags[image_id]) {
-    tags[image_id] = [];
-  }
+  const { error } = await supabase
+    .from("annotations")
+    .insert([{ image_id, tags }]);
 
-  tags[image_id].push(tag);
+  if (error) return res.status(500).json({ error });
 
-  // écriture "sécurisée" simple
-  fs.writeFile('tags.json', JSON.stringify(tags, null, 2), (err) => {
-    if (err) {
-      console.error(err);
-      return res.sendStatus(500);
-    }
-    res.sendStatus(200);
-  });
+  res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log("Server running"));

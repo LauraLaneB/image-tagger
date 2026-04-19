@@ -1,84 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Tagger Disney</title>
+
   <style>
-    body { font-family: sans-serif; text-align: center; }
-    img { max-width: 100%; height: auto; }
-    input, button { padding: 10px; margin: 10px; font-size: 16px; }
-#validateBtn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-}
-
-#skipBtn {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-}
-
-button {
-  padding: 10px 15px;
-  margin: 5px;
-  font-size: 16px;
-  border-radius: 6px;
-}
+    body { font-family: Arial; text-align: center; }
+    img { max-width: 300px; margin: 10px; }
+    .hidden { display: none; }
+    input { margin: 5px; padding: 8px; }
+    button { padding: 10px; margin: 5px; }
   </style>
 </head>
+
 <body>
 
-<h2>Qui vois-tu sur ce dessin ?</h2>
+<h2>Qui vois-tu sur cette image ?</h2>
 
-<img id="image" src="" />
-<p>S'il y a plusieurs personnages, sépare chaque nom par un point. Merci de ton aide !</p>
+<div id="step1">
+  <img id="image" />
+  <br>
+  <button onclick="nextStep()">Commencer</button>
+</div>
 
-<br>
+<div id="step2" class="hidden">
+  <p>Combien de personnages vois-tu ?</p>
+  <input type="number" id="count" min="1" />
+  <button onclick="generateInputs()">Valider</button>
+</div>
 
-<input type="text" id="tagInput" placeholder="Qui vois-tu ?">
-<br>
-
-<button id="validateBtn" onclick="submitAndNext()">Valider et suivant</button>
-<button id="skipBtn" onclick="skipImage()">Je ne sais pas</button>
+<div id="step3" class="hidden">
+  <div id="inputs"></div>
+  <button onclick="submitTags()">Envoyer</button>
+</div>
 
 <script>
-let currentImageId = null;
 
-async function loadImage() {
-  const res = await fetch('/random-image');
-  const data = await res.json();
+let currentImage = null;
 
-  document.getElementById('image').src = data.url;
-  currentImageId = data.id;
-}
+const characters = [
+  "Mickey", "Minnie", "Donald", "Daisy",
+  "Cendrillon", "Elsa", "Anna", "Buzz Lightyear"
+];
 
-async function submitAndNext() {
-  const tagInput = document.getElementById('tagInput');
-  const tag = tagInput.value;
-
-  if (!tag) {
-    alert('Entre un tag');
-    return;
-  }
-
-async function skipImage() {
-  loadImage();
-}
-
-  await fetch('/tag', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      image_id: currentImageId,
-      tag: tag
-    })
+// 🔄 charger image
+fetch("/random-image")
+  .then(r => r.json())
+  .then(data => {
+    currentImage = data;
+    document.getElementById("image").src = data.url;
   });
 
-  tagInput.value = '';
-  loadImage();
+function nextStep() {
+  document.getElementById("step1").classList.add("hidden");
+  document.getElementById("step2").classList.remove("hidden");
 }
 
-loadImage();
+function generateInputs() {
+  const count = document.getElementById("count").value;
+  const container = document.getElementById("inputs");
+
+  container.innerHTML = "";
+
+  for (let i = 0; i < count; i++) {
+    const input = document.createElement("input");
+    input.placeholder = "Personnage " + (i + 1);
+
+    input.oninput = function () {
+      showSuggestions(input);
+    };
+
+    container.appendChild(input);
+  }
+
+  document.getElementById("step2").classList.add("hidden");
+  document.getElementById("step3").classList.remove("hidden");
+}
+
+// 🔎 autocomplete simple
+function showSuggestions(input) {
+  const value = input.value.toLowerCase();
+
+  const match = characters.filter(c =>
+    c.toLowerCase().startsWith(value)
+  );
+
+  console.log(match); // simple debug (améliorable UI)
+}
+
+function submitTags() {
+  const inputs = document.querySelectorAll("#inputs input");
+
+  let tags = [];
+
+  inputs.forEach(i => {
+    if (i.value.trim() !== "") {
+      tags.push(i.value.trim());
+    }
+  });
+
+  fetch("/tag", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      image_id: currentImage.id,
+      tags: tags.join(";")   // 👈 IMPORTANT pour Excel
+    })
+  }).then(() => {
+    alert("Envoyé !");
+    location.reload();
+  });
+}
+
 </script>
 
 </body>
