@@ -81,15 +81,25 @@ function generateInputs() {
   container.innerHTML = "";
 
   for (let i = 0; i < count; i++) {
+    const wrapper = document.createElement("div");
+    wrapper.style.margin = "10px";
+
     const input = document.createElement("input");
     input.placeholder = "Personnage " + (i + 1);
 
-    input.oninput = function () {
-      showSuggestions(input);
+    const skipBtn = document.createElement("button");
+    skipBtn.innerText = "Je ne sais pas";
+    skipBtn.onclick = () => {
+      input.value = "INCONNU";
+      input.disabled = true;
     };
 
-    container.appendChild(input);
+    wrapper.appendChild(input);
+    wrapper.appendChild(skipBtn);
+
+    container.appendChild(wrapper);
   }
+
 
   document.getElementById("step2").classList.add("hidden");
   document.getElementById("step3").classList.remove("hidden");
