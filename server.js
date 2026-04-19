@@ -12,11 +12,7 @@ const supabase = createClient(
 );
 
 // 🖼️ Images (tu peux garder ton dossier images OU liste)
-const images = [
-  { id: "img1", url: "/images/img1.jpg" },
-  { id: "img2", url: "/images/img2.jpg" },
-  { id: "img3", url: "/images/img3.jpg" }
-];
+const images = fs.readdirSync('./images');
 
 // 🎲 image aléatoire
 app.get("/random-image", (req, res) => {
