@@ -104,7 +104,7 @@ function generateInputs() {
 
 
   document.getElementById("step2").classList.add("hidden");
-  document.getElementById("step3").classList.remove("hidden");
+
 }
 
 // 🔎 autocomplete simple
@@ -134,11 +134,10 @@ function submitTags() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       image_id: currentImage.id,
-      tags: tags.join(";")   // 👈 IMPORTANT pour Excel
+      tags: tags.join(";")
     })
   }).then(() => {
-    alert("Envoyé !");
-    location.reload();
+    location.reload(); // 👈 passe direct à l’image suivante
   });
 }
 
