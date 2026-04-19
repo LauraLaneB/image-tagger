@@ -1,6 +1,6 @@
 const express = require("express");
 const fs = require("fs");
-
+const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 const app = express();
 
@@ -16,7 +16,7 @@ const supabase = createClient(
 );
 
 // 🖼️ Images (tu peux garder ton dossier images OU liste)
-const path = require("path");
+
 
 const images = fs.readdirSync(path.join(__dirname, "images"))
   .map(file => ({
