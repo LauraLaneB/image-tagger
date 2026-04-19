@@ -5,35 +5,53 @@
   <title>image-tagger</title>
 
   <style>
-    body { font-family: Arial; text-align: center; }
-    img { max-width: 300px; margin: 10px; }
+   body {
+  font-family: Arial;
+  text-align: center;
+  padding: 10px;
+}
+
+img {
+  max-width: 90%;
+  height: auto;
+  margin-bottom: 15px;
+}
+
     .hidden { display: none; }
-    input { margin: 5px; padding: 8px; }
-    button { padding: 10px; margin: 5px; }
-  </style>
+#inputs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+#inputs input {
+  width: 45%;   /* 👈 2 par ligne */
+  padding: 10px;
+  box-sizing: border-box;
+}    button { padding: 10px; margin: 5px; }
+  
+input {
+  font-size: 16px; /* évite zoom iPhone automatique */
+}
+</style>
 </head>
 
 <body>
 
 <h2>Qui vois-tu sur cette image ?</h2>
 
-<div id="step1">
-  <img id="image" />
-  <br>
-  <button onclick="nextStep()">Commencer</button>
-</div>
+<img id="image" />
 
-<div id="step2" class="hidden">
+<div id="step2">
   <p>Combien de personnages vois-tu ?</p>
   <input type="number" id="count" min="1" />
   <button onclick="generateInputs()">Valider</button>
 </div>
 
-<div id="step3" class="hidden">
-  <div id="inputs"></div>
-  <button onclick="submitTags()">Envoyer</button>
-</div>
+<div id="inputs"></div>
 
+<button onclick="submitTags()">Envoyer</button>
 <script>
 
 let currentImage = null;
