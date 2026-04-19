@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; text-align: center; }
+    img { max-width: 100%; height: auto; }
+    input, button { padding: 10px; margin: 10px; font-size: 16px; }
+#validateBtn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+}
+
+#skipBtn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+}
+
+button {
+  padding: 10px 15px;
+  margin: 5px;
+  font-size: 16px;
+  border-radius: 6px;
+}
+  </style>
+</head>
+<body>
+
+<h2>Qui vois-tu sur ce dessin ?</h2>
+
+<img id="image" src="" />
+<p>S'il y a plusieurs personnages, sépare chaque nom par un point. Merci de ton aide !</p>
+
+<br>
+
+<input type="text" id="tagInput" placeholder="Qui vois-tu ?">
+<br>
+
+<button id="validateBtn" onclick="submitAndNext()">Valider et suivant</button>
+<button id="skipBtn" onclick="skipImage()">Je ne sais pas</button>
+
+<script>
+let currentImageId = null;
+
+async function loadImage() {
+  const res = await fetch('/random-image');
+  const data = await res.json();
+
+  document.getElementById('image').src = data.url;
+  currentImageId = data.id;
+}
+
+async function submitAndNext() {
+  const tagInput = document.getElementById('tagInput');
+  const tag = tagInput.value;
+
+  if (!tag) {
+    alert('Entre un tag');
+    return;
+  }
+
+async function skipImage() {
+  loadImage();
+}
+
+  await fetch('/tag', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      image_id: currentImageId,
+      tag: tag
+    })
+  });
+
+  tagInput.value = '';
+  loadImage();
+}
+
+loadImage();
+</script>
+
+</body>
+</html>
